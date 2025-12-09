@@ -1,52 +1,45 @@
-import os       # Tu herramienta para manejar el Sistema Operativo
-import shutil   # Tu herramienta para mover cosas
+import os
+import shutil
 
-# 1. VARIABLES (Nivel 1)
-# Definimos dónde va a trabajar el script
-# La 'r' al principio es importante en Windows para que lea bien las barras "\"
-carpeta_a_ordenar = r"C:\Users\Julia\Desktop\Prueba_Organizador"
+def organizar_archivos():
+    base_path = input("Ingresa la ruta de la carpeta a ordenar: ").strip()
 
-# 2. LISTAS (Nivel 4)
-# Creamos una lista con todos los nombres de archivos en esa carpeta
-archivos = os.listdir(carpeta_a_ordenar)
+    if not os.path.exists(base_path):
+        print(f"Error: La ruta '{base_path}' no existe.")
+        return
 
-# 3. BUCLE (Nivel 5)
-# "Para cada archivo en la lista de archivos..."
-for archivo in archivos:
-    
-    # Obtenemos la ruta completa (ej: C:\Users\...\foto.jpg)
-    ruta_completa = os.path.join(carpeta_a_ordenar, archivo)
-    
-    # Verificamos que sea un archivo y no una carpeta (para no mover carpetas)
-    if os.path.isfile(ruta_completa):
-        
-        # 4. DECISIONES (Nivel 3)
-        # Aquí definimos a dónde va cada cosa
-        carpeta_destino = "" # Empezamos con la variable vacía
+    archivos = os.listdir(base_path)
+    conteo = 0
 
-        if archivo.endswith(".jpg"):
+    print(f"Procesando carpeta: {base_path}...")
+
+    for archivo in archivos:
+        ruta_origen = os.path.join(base_path, archivo)
+
+        if not os.path.isfile(ruta_origen):
+            continue
+
+        ext = os.path.splitext(archivo)[1].lower()
+        carpeta_destino = None
+
+        if ext in ['.jpg', '.jpeg', '.png', '.gif', '.bmp']:
             carpeta_destino = "Imagenes"
-        elif archivo.endswith(".pdf"):
+        elif ext in ['.pdf', '.doc', '.docx', '.xlsx', '.pptx']:
             carpeta_destino = "Documentos"
-        elif archivo.endswith(".txt"):
+        elif ext in ['.txt', '.log', '.md']:
             carpeta_destino = "Texto"
-        else:
-            # Si es otro tipo de archivo, no hacemos nada y pasamos al siguiente
-            continue 
-        
-        # 5. CREAR CARPETA
-        # Calculamos la ruta de la carpeta destino (ej: ...\Prueba\Imagenes)
-        ruta_carpeta_nueva = os.path.join(carpeta_a_ordenar, carpeta_destino)
-        
-        # Si la carpeta no existe, la creamos (exist_ok=True evita errores si ya existe)
-        os.makedirs(ruta_carpeta_nueva, exist_ok=True)
-        
-        # 6. FUNCIONES (Nivel 7)
-        # Usamos la función move() para trasladar el archivo
-        shutil.move(ruta_completa, ruta_carpeta_nueva)
-        
-        # Feedback para el usuario
-        print(f"Movido: {archivo} --> {carpeta_destino}")
+        elif ext in ['.exe', '.msi', '.zip', '.rar']:
+            carpeta_destino = "Instaladores_Zip"
 
-print("--------------------------------")
-print(f"¡Listo! Se organizaron los archivos en: {carpeta_a_ordenar}")
+        if carpeta_destino:
+            ruta_destino = os.path.join(base_path, carpeta_destino)
+            os.makedirs(ruta_destino, exist_ok=True)
+            
+            shutil.move(ruta_origen, os.path.join(ruta_destino, archivo))
+            print(f"Movido: {archivo} -> {carpeta_destino}")
+            conteo += 1
+
+    print(f"Proceso finalizado. Total archivos movidos: {conteo}")
+
+if __name__ == "__main__":
+    organizar_archivos()
